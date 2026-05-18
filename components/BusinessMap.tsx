@@ -1,106 +1,203 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import 'leaflet/dist/leaflet.css'
-import { supabase } from '@/lib/supabase'
+import { supabase, Profile } from '@/lib/supabase'
+import { getDistanceKm } from '@/lib/utils'
+import SupplyRadiusControl from './SupplyRadiusControl'
+import ProducerPopup from './ProducerPopup'
 
-interface Negocio {
+interface CurrentUser {
   id: string
-  name: string
-  category: string
   lat: number
   lng: number
+  role: string
+  supply_radius_km: number
 }
 
-// Datos demo — Macroplaza de Monterrey, NL
-const NEGOCIOS_DEMO: Negocio[] = [
-  { id: 'd1', name: 'Cafetería El Buen Sabor', category: 'Cafetería', lat: 25.6691, lng: -100.3098 },
-  { id: 'd2', name: 'Panadería La Tradicional', category: 'Panadería', lat: 25.6720, lng: -100.3150 },
-  { id: 'd3', name: 'Abarrotes Don Chuy', category: 'Abarrotes', lat: 25.6660, lng: -100.3080 },
-  { id: 'd4', name: 'Farmacia Comunitaria', category: 'Farmacia', lat: 25.6710, lng: -100.3200 },
-  { id: 'd5', name: 'Mercado San Luisito', category: 'Mercado', lat: 25.6635, lng: -100.3120 },
-]
+interface Props {
+  currentUser: CurrentUser
+  allProfiles: Profile[]
+}
 
-export default function BusinessMap() {
-  const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<{ remove: () => void } | null>(null)
+// Colores e iconos por rol
+const ROLE_CONFIG: Record<string, { color: string; emoji: string }> = {
+  consumer:          { color: '#9ca3af', emoji: '👤' },
+  business:          { color: '#2563eb', emoji: '🏪' },
+  producer_farm:     { color: '#16a34a', emoji: '🌱' },
+  producer_artisan:  { color: '#ea580c', emoji: '🏺' },
+}
 
+const PRODUCER_ROLES = ['producer_farm', 'producer_artisan']
+const CONTROL_ROLES  = ['business', 'producer_farm', 'producer_artisan']
+
+function divIconHtml(emoji: string, color: string, opacity: number) {
+  return `<div style="
+    background:${color};width:32px;height:32px;
+    border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3);
+    opacity:${opacity};display:flex;align-items:center;justify-content:center;
+  "><span style="transform:rotate(45deg);font-size:13px;">${emoji}</span></div>`
+}
+
+export default function BusinessMap({ currentUser, allProfiles }: Props) {
+  const mapDivRef    = useRef<HTMLDivElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapRef       = useRef<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const circleRef    = useRef<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const groupRef     = useRef<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const leafletRef   = useRef<any>(null)
+
+  const [radius, setRadius]             = useState(currentUser.supply_radius_km || 10)
+  const [selected, setSelected]         = useState<Profile | null>(null)
+  const [selectedDist, setSelectedDist] = useState(0)
+  const [saving, setSaving]             = useState(false)
+
+  const producersInRange = allProfiles.filter(p =>
+    PRODUCER_ROLES.includes(p.role) && p.lat && p.lng &&
+    getDistanceKm(currentUser.lat, currentUser.lng, p.lat!, p.lng!) <= radius
+  ).length
+
+  // Dibuja (o redibuja) todos los markers del grupo
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function drawMarkers(L: any, r: number) {
+    if (!groupRef.current) return
+    groupRef.current.clearLayers()
+
+    allProfiles.forEach(profile => {
+      if (!profile.lat || !profile.lng || profile.id === currentUser.id) return
+
+      const dist    = getDistanceKm(currentUser.lat, currentUser.lng, profile.lat, profile.lng)
+      const isProducer = PRODUCER_ROLES.includes(profile.role)
+      const inRange = dist <= r
+      const cfg     = ROLE_CONFIG[profile.role] ?? ROLE_CONFIG.consumer
+      const opacity = isProducer && !inRange ? 0.3 : 1
+
+      const icon = L.divIcon({
+        html: divIconHtml(cfg.emoji, cfg.color, opacity),
+        iconSize:   [32, 32],
+        iconAnchor: [16, 32],
+        className:  '',
+      })
+
+      const marker = L.marker([profile.lat, profile.lng], { icon })
+
+      if (isProducer) {
+        marker.on('click', () => {
+          setSelected(profile)
+          setSelectedDist(dist)
+        })
+      } else {
+        marker.bindPopup(`
+          <div style="font-family:serif;min-width:130px;">
+            <b style="font-size:13px;">${profile.name}</b><br/>
+            <span style="color:#666;font-size:11px;">${profile.category ?? profile.role}</span>
+          </div>`)
+      }
+
+      groupRef.current.addLayer(marker)
+    })
+  }
+
+  // Inicializar mapa una sola vez
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return
-
-    async function initMap() {
+    if (mapRef.current) return
+    async function init() {
       const L = (await import('leaflet')).default
+      leafletRef.current = L
 
-      // Fix rutas de íconos de Leaflet en Next.js
+      // Fix rutas de íconos de Leaflet
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl
       L.Icon.Default.mergeOptions({
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       })
 
-      const map = L.map(mapRef.current!).setView([25.6691, -100.3098], 14)
-      mapInstanceRef.current = map
+      const map = L.map(mapDivRef.current!).setView([currentUser.lat, currentUser.lng], 13)
+      mapRef.current = map
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        attribution: '© OpenStreetMap contributors',
       }).addTo(map)
 
-      // Intentar cargar negocios con coordenadas desde Supabase; usar demo como fallback
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, name, category, lat, lng')
-        .eq('role', 'business')
-        .not('lat', 'is', null)
+      // Círculo de radio
+      circleRef.current = L.circle([currentUser.lat, currentUser.lng], {
+        radius:      radius * 1000,
+        color:       '#2563eb',
+        fillColor:   '#2563eb',
+        fillOpacity: 0.08,
+        weight:      2,
+      }).addTo(map)
 
-      const negocios: Negocio[] = (data && data.length > 0)
-        ? (data as Negocio[])
-        : NEGOCIOS_DEMO
+      // Grupo de markers
+      groupRef.current = L.layerGroup().addTo(map)
+      drawMarkers(L, radius)
 
-      const iconoRojo = L.divIcon({
-        html: `<div style="
-          background:#b91c1c;
-          width:32px;height:32px;
-          border-radius:50% 50% 50% 0;
-          transform:rotate(-45deg);
-          border:3px solid white;
-          box-shadow:0 2px 6px rgba(0,0,0,0.3);
-        "></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        className: '',
-      })
-
-      negocios.forEach(negocio => {
-        const marker = L.marker([negocio.lat, negocio.lng], { icon: iconoRojo }).addTo(map)
-        marker.bindPopup(`
-          <div style="font-family:sans-serif;min-width:160px;padding:4px 0;">
-            <p style="font-weight:700;font-size:14px;margin:0 0 4px;color:#1a1a1a;">${negocio.name}</p>
-            <p style="color:#666;font-size:12px;margin:0 0 8px;">${negocio.category}</p>
-            <span style="background:#b91c1c;color:white;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;">
-              ✓ Acepta NodoCoins
-            </span>
-          </div>
-        `)
-      })
+      // Marker del usuario actual (estrella amarilla)
+      L.marker([currentUser.lat, currentUser.lng], {
+        icon: L.divIcon({
+          html: `<div style="
+            background:#fbbf24;width:38px;height:38px;
+            border-radius:50%;border:3px solid white;
+            box-shadow:0 2px 8px rgba(0,0,0,.4);
+            display:flex;align-items:center;justify-content:center;font-size:20px;
+          ">⭐</div>`,
+          iconSize:   [38, 38],
+          iconAnchor: [19, 19],
+          className:  '',
+        }),
+      }).addTo(map).bindPopup('<b>📍 Tú estás aquí</b>')
     }
-
-    initMap()
+    init()
 
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove()
-        mapInstanceRef.current = null
-      }
+      mapRef.current?.remove()
+      mapRef.current = null
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Actualizar círculo y markers cuando cambia el radio
+  useEffect(() => {
+    if (!leafletRef.current) return
+    circleRef.current?.setRadius(radius * 1000)
+    drawMarkers(leafletRef.current, radius)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [radius])
+
+  async function handleSaveRadius() {
+    setSaving(true)
+    await supabase.from('profiles').update({ supply_radius_km: radius }).eq('id', currentUser.id)
+    setSaving(false)
+  }
+
   return (
-    <div
-      ref={mapRef}
-      className="w-full rounded-xl overflow-hidden shadow-sm"
-      style={{ height: 'calc(100vh - 160px)', minHeight: '400px' }}
-    />
+    <div className="relative w-full" style={{ height: 'calc(100vh - 160px)', minHeight: '400px' }}>
+      <div ref={mapDivRef} className="w-full h-full rounded-xl overflow-hidden shadow-sm" />
+
+      {CONTROL_ROLES.includes(currentUser.role) && (
+        <SupplyRadiusControl
+          radius={radius}
+          onChange={r => { setRadius(r); setSelected(null) }}
+          onSave={handleSaveRadius}
+          producersInRange={producersInRange}
+          saving={saving}
+        />
+      )}
+
+      {selected && (
+        <ProducerPopup
+          profile={selected}
+          distanceKm={selectedDist}
+          userRadius={radius}
+          onClose={() => setSelected(null)}
+        />
+      )}
+    </div>
   )
 }

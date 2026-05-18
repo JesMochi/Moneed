@@ -8,7 +8,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'placeholde
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Tipos para la base de datos
-export type UserRole = 'consumer' | 'business'
+export type UserRole = 'consumer' | 'business' | 'producer_farm' | 'producer_artisan'
 
 export interface Profile {
   id: string
@@ -18,6 +18,7 @@ export interface Profile {
   category?: string
   lat?: number
   lng?: number
+  supply_radius_km?: number
   created_at: string
 }
 
