@@ -27,9 +27,12 @@ interface CurrentUser {
 export default function MapPage() {
   const router = useRouter()
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
-  const [allProfiles, setAllProfiles]  = useState<Profile[]>([])
-  const [loading, setLoading]          = useState(true)
-  const [noLocation, setNoLocation]    = useState(false)
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([])
+  const [loading, setLoading]         = useState(true)
+
+  // Coordenadas por defecto si el usuario no tiene ubicación (Monterrey, NL)
+  const DEFAULT_LAT = 25.6691
+  const DEFAULT_LNG = -100.3098
 
   useEffect(() => {
     async function load() {
@@ -42,28 +45,24 @@ export default function MapPage() {
         .eq('id', user.id)
         .single()
 
-      if (!me?.lat || !me?.lng) {
-        setNoLocation(true)
-        setLoading(false)
-        return
-      }
-
       const { data: profiles } = await supabase
         .from('profiles')
         .select('*')
         .not('lat', 'is', null)
 
+      // Si el usuario no tiene coordenadas, centra el mapa en la ubicación demo
       setCurrentUser({
-        id:               me.id,
-        lat:              me.lat,
-        lng:              me.lng,
-        role:             me.role,
-        supply_radius_km: me.supply_radius_km ?? 10,
+        id:               me?.id ?? user.id,
+        lat:              me?.lat ?? DEFAULT_LAT,
+        lng:              me?.lng ?? DEFAULT_LNG,
+        role:             me?.role ?? 'consumer',
+        supply_radius_km: me?.supply_radius_km ?? 10,
       })
       setAllProfiles(profiles ?? [])
       setLoading(false)
     }
     load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
   return (
@@ -77,16 +76,6 @@ export default function MapPage() {
         <div className="w-full rounded-xl bg-gray-100 animate-pulse flex items-center justify-center"
           style={{ height: 'calc(100vh - 160px)' }}>
           <p className="text-gray-400 text-sm">Cargando...</p>
-        </div>
-      )}
-
-      {noLocation && !loading && (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <span className="text-5xl">📍</span>
-          <p className="font-bold text-gray-700">Sin ubicación registrada</p>
-          <p className="text-gray-400 text-sm max-w-xs">
-            Agrega tu latitud y longitud en tu perfil de Supabase para aparecer en el mapa.
-          </p>
         </div>
       )}
 
