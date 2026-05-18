@@ -3,20 +3,36 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8f9fa;
+  --background: #f3f4f6;
   --foreground: #1a1a1a;
-  --primary: #c0392b;
-  --primary-dark: #962d22;
+  --primary: #b91c1c;
+  --primary-dark: #7f1d1d;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Evita el scroll horizontal en mobile */
+html, body {
+  overflow-x: hidden;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Animación de entrada para tarjetas */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.35s ease-out both;
 }

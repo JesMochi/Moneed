@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile } from '@/lib/supabase'
 import WalletCard from '@/components/WalletCard'
+import ImpactDashboard from '@/components/ImpactDashboard'
 
 const ACCIONES = [
   { href: '/transfer', label: 'Pagar', icon: '📷', desc: 'Escanear QR', roles: ['consumer', 'business'] },
@@ -80,6 +81,8 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+
+      <ImpactDashboard />
     </div>
   )
 }

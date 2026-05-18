@@ -11,7 +11,7 @@ export default function WalletCard({ profile }: Props) {
   const dias = diasParaVencer(profile.created_at)
 
   return (
-    <div className="bg-red-700 rounded-2xl p-5 text-white shadow-lg">
+    <div className="bg-red-700 rounded-2xl p-5 text-white shadow-lg animate-fade-up">
       <div className="flex justify-between items-start">
         <div>
           <p className="text-red-200 text-sm">Hola, {profile.name}</p>
