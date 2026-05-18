@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
@@ -34,51 +35,65 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-red-50 to-gray-100 px-4">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-red-700">MonedaRed</h1>
-          <p className="text-gray-500 text-sm mt-1">Circulación económica local</p>
+
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <Image
+            src="/logo.png"
+            alt="MonedaRed"
+            width={120}
+            height={120}
+            className="drop-shadow-xl"
+            priority
+          />
+          <h1 className="text-3xl font-black text-red-700 mt-2 tracking-tight">MonedaRed</h1>
+          <p className="text-gray-500 font-medium text-sm mt-1">Circulación económica local</p>
         </div>
 
-        <form onSubmit={handleLogin} className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+        <form onSubmit={handleLogin} className="bg-white rounded-3xl shadow-md p-6 space-y-4">
           <div>
-            <label className="text-sm font-medium text-gray-700">Email</label>
+            <label className="text-sm font-bold text-gray-600">Email</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
               placeholder="tu@email.com"
               required
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700">Contraseña</label>
+            <label className="text-sm font-bold text-gray-600">Contraseña</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
               placeholder="••••••••"
               required
             />
           </div>
 
-          {error && <p className="text-red-600 text-sm text-center">{error}</p>}
+          {error && (
+            <p className="text-red-600 text-sm text-center font-semibold bg-red-50 rounded-xl py-2 px-3">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-700 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-red-800 transition-colors disabled:opacity-50"
+            className="w-full bg-red-600 text-white py-3.5 rounded-2xl font-extrabold text-base hover:bg-red-700 active:scale-95 transition-all disabled:opacity-50 shadow-md shadow-red-200"
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-gray-500 mt-5 font-medium">
           ¿No tienes cuenta?{' '}
-          <Link href="/register" className="text-red-700 font-medium">Regístrate</Link>
+          <Link href="/register" className="text-red-600 font-extrabold">Regístrate</Link>
         </p>
       </div>
     </div>

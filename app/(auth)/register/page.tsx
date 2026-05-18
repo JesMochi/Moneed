@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
 const CATEGORIAS = ['Cafetería', 'Panadería', 'Abarrotes', 'Restaurante', 'Farmacia', 'Mercado', 'Artesanías', 'Otro']
@@ -55,45 +56,48 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-red-50 to-gray-100 px-4 py-8">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-red-700">MonedaRed</h1>
-          <p className="text-gray-500 text-sm mt-1">Crea tu cuenta</p>
+
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-6">
+          <Image src="/logo.png" alt="MonedaRed" width={90} height={90} className="drop-shadow-xl" priority />
+          <h1 className="text-3xl font-black text-red-700 mt-2 tracking-tight">MonedaRed</h1>
+          <p className="text-gray-500 font-medium text-sm mt-1">Crea tu cuenta</p>
         </div>
 
-        <form onSubmit={handleRegister} className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+        <form onSubmit={handleRegister} className="bg-white rounded-3xl shadow-md p-6 space-y-4">
           <div>
-            <label className="text-sm font-medium text-gray-700">Nombre</label>
+            <label className="text-sm font-bold text-gray-600">Nombre</label>
             <input
               type="text"
               value={form.name}
               onChange={e => update('name', e.target.value)}
-              className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
               placeholder="Tu nombre o nombre del negocio"
               required
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Email</label>
+            <label className="text-sm font-bold text-gray-600">Email</label>
             <input
               type="email"
               value={form.email}
               onChange={e => update('email', e.target.value)}
-              className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
               placeholder="tu@email.com"
               required
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Contraseña</label>
+            <label className="text-sm font-bold text-gray-600">Contraseña</label>
             <input
               type="password"
               value={form.password}
               onChange={e => update('password', e.target.value)}
-              className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
               placeholder="Mínimo 6 caracteres"
               minLength={6}
               required
@@ -101,18 +105,20 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Tipo de cuenta</label>
+            <label className="text-sm font-bold text-gray-600">Tipo de cuenta</label>
             <div className="mt-1 grid grid-cols-2 gap-2">
               {(['consumer', 'business'] as const).map(r => (
                 <button
                   key={r}
                   type="button"
                   onClick={() => update('role', r)}
-                  className={`py-2.5 rounded-lg text-sm font-medium border transition-colors ${
-                    form.role === r ? 'bg-red-700 text-white border-red-700' : 'bg-white text-gray-600 border-gray-200'
+                  className={`py-3 rounded-2xl text-sm font-extrabold border-2 transition-all active:scale-95 ${
+                    form.role === r
+                      ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200'
+                      : 'bg-white text-gray-500 border-gray-100'
                   }`}
                 >
-                  {r === 'consumer' ? 'Consumidor' : 'Negocio'}
+                  {r === 'consumer' ? '🛍️ Consumidor' : '🏪 Negocio'}
                 </button>
               ))}
             </div>
@@ -120,11 +126,11 @@ export default function RegisterPage() {
 
           {form.role === 'business' && (
             <div>
-              <label className="text-sm font-medium text-gray-700">Categoría del negocio</label>
+              <label className="text-sm font-bold text-gray-600">Categoría del negocio</label>
               <select
                 value={form.category}
                 onChange={e => update('category', e.target.value)}
-                className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
                 required
               >
                 <option value="">Selecciona una categoría</option>
@@ -133,20 +139,24 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {error && <p className="text-red-600 text-sm text-center">{error}</p>}
+          {error && (
+            <p className="text-red-600 text-sm text-center font-semibold bg-red-50 rounded-xl py-2 px-3">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-700 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-red-800 transition-colors disabled:opacity-50"
+            className="w-full bg-red-600 text-white py-3.5 rounded-2xl font-extrabold text-base hover:bg-red-700 active:scale-95 transition-all disabled:opacity-50 shadow-md shadow-red-200"
           >
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-gray-500 mt-5 font-medium">
           ¿Ya tienes cuenta?{' '}
-          <Link href="/login" className="text-red-700 font-medium">Inicia sesión</Link>
+          <Link href="/login" className="text-red-600 font-extrabold">Inicia sesión</Link>
         </p>
       </div>
     </div>
