@@ -20,7 +20,7 @@ export default function RegisterPage() {
     setLoading(true)
     setError('')
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: {
@@ -36,6 +36,18 @@ export default function RegisterPage() {
       setError(error.message)
       setLoading(false)
       return
+    }
+
+    // Crea el perfil manualmente como respaldo al trigger
+    // (el trigger puede tardar o fallar en algunos entornos Supabase)
+    if (data.user) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        name: form.name,
+        role: form.role,
+        balance: 100,
+        category: form.role === 'business' ? form.category : null,
+      }, { onConflict: 'id' })
     }
 
     router.push('/home')
