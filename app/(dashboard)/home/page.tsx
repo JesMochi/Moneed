@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile } from '@/lib/supabase'
-import Image from 'next/image'
 import WalletCard from '@/components/WalletCard'
 import ImpactDashboard from '@/components/ImpactDashboard'
 
@@ -58,10 +57,7 @@ export default function HomePage() {
   return (
     <div className="p-4 space-y-5">
       <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-2">
-          <Image src="/logo.png" alt="MonedaRed" width={36} height={36} className="drop-shadow" />
-          <span className="text-xl font-black text-red-700 tracking-tight">MonedaRed</span>
-        </div>
+        <span className="text-xl font-bold text-red-700">MonedaRed</span>
         <button onClick={handleLogout} className="text-gray-400 text-sm font-semibold hover:text-gray-600">
           Salir
         </button>

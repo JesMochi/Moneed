@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
 const CATEGORIAS = ['Cafetería', 'Panadería', 'Abarrotes', 'Restaurante', 'Farmacia', 'Mercado', 'Artesanías', 'Otro']
@@ -59,11 +58,9 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-red-50 to-gray-100 px-4 py-8">
       <div className="w-full max-w-sm">
 
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-6">
-          <Image src="/logo.png" alt="MonedaRed" width={90} height={90} className="drop-shadow-xl" priority />
-          <h1 className="text-3xl font-black text-red-700 mt-2 tracking-tight">MonedaRed</h1>
-          <p className="text-gray-500 font-medium text-sm mt-1">Crea tu cuenta</p>
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold text-red-700">MonedaRed</h1>
+          <p className="text-gray-500 text-sm mt-1">Crea tu cuenta</p>
         </div>
 
         <form onSubmit={handleRegister} className="bg-white rounded-3xl shadow-md p-6 space-y-4">

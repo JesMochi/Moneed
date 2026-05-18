@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
@@ -37,19 +36,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-red-50 to-gray-100 px-4">
       <div className="w-full max-w-sm">
-
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <Image
-            src="/logo.png"
-            alt="MonedaRed"
-            width={120}
-            height={120}
-            className="drop-shadow-xl"
-            priority
-          />
-          <h1 className="text-3xl font-black text-red-700 mt-2 tracking-tight">MonedaRed</h1>
-          <p className="text-gray-500 font-medium text-sm mt-1">Circulación económica local</p>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-red-700">MonedaRed</h1>
+          <p className="text-gray-500 text-sm mt-1">Circulación económica local</p>
         </div>
 
         <form onSubmit={handleLogin} className="bg-white rounded-3xl shadow-md p-6 space-y-4">

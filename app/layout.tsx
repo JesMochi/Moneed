@@ -1,12 +1,5 @@
 import type { Metadata } from 'next'
-import { Nunito } from 'next/font/google'
 import './globals.css'
-
-const nunito = Nunito({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-nunito',
-})
 
 export const metadata: Metadata = {
   title: 'MonedaRed',
@@ -20,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${nunito.variable} font-nunito`}>
+      <body className="font-serif">
         {children}
       </body>
     </html>

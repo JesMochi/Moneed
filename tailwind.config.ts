@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        nunito: ['var(--font-nunito)', 'sans-serif'],
+        serif: ['"Times New Roman"', 'Times', 'serif'],
       },
       colors: {
         background: "var(--background)",
