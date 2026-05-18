@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Leaflet CSS — cargado globalmente para evitar problemas con dynamic import */
+@import 'leaflet/dist/leaflet.css';
+
 :root {
   --background: #f3f4f6;
   --foreground: #1a1a1a;

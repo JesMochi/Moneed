@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import 'leaflet/dist/leaflet.css'
 import { supabase, Profile } from '@/lib/supabase'
 import { getDistanceKm } from '@/lib/utils'
 import SupplyRadiusControl from './SupplyRadiusControl'
@@ -168,11 +167,13 @@ export default function BusinessMap({ currentUser, allProfiles: rawProfiles }: P
         }),
       }).addTo(map).bindPopup('<b>📍 Tú estás aquí</b>')
     }
-    init()
+    init().catch(err => console.error('Error al inicializar el mapa:', err))
 
     return () => {
-      mapRef.current?.remove()
-      mapRef.current = null
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
