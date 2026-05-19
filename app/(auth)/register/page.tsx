@@ -11,8 +11,33 @@ function RegisterForm() {
   const router       = useRouter()
   const searchParams = useSearchParams()
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'consumer', category: '' })
-  const [error, setError]   = useState('')
+  const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
+  const [ubicacion, setUbicacion] = useState<{ lat: number; lng: number } | null>(null)
+  const [gpsLoading, setGpsLoading] = useState(false)
+  const [gpsError, setGpsError]     = useState('')
+
+  const esNegocio = ['business', 'producer_farm', 'producer_artisan'].includes(form.role)
+
+  function obtenerUbicacion() {
+    if (!navigator.geolocation) {
+      setGpsError('Tu dispositivo no soporta geolocalización')
+      return
+    }
+    setGpsLoading(true)
+    setGpsError('')
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setUbicacion({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        setGpsLoading(false)
+      },
+      () => {
+        setGpsError('No se pudo obtener la ubicación. Verifica los permisos.')
+        setGpsLoading(false)
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
 
   // Pre-llenar desde URL si viene del mapa (demo business)
   useEffect(() => {
@@ -58,22 +83,19 @@ function RegisterForm() {
 
     // Crea el perfil manualmente como respaldo al trigger
     if (data.user) {
-      const latParam = searchParams.get('lat')
-      const lngParam = searchParams.get('lng')
       await supabase.from('profiles').upsert({
         id:       data.user.id,
         name:     form.name,
         role:     form.role,
         balance:  100,
-        category: form.role === 'business' ? form.category : null,
-        // Si vino del mapa, guarda las coordenadas del negocio demo para aparecer en el mapa real
-        lat: latParam ? Number(latParam) : null,
-        lng: lngParam ? Number(lngParam) : null,
+        category: esNegocio ? form.category : null,
+        // Guarda coordenadas GPS si el negocio las capturó
+        lat: ubicacion?.lat ?? null,
+        lng: ubicacion?.lng ?? null,
       }, { onConflict: 'id' })
     }
 
     const vieneDeMapa = searchParams.get('nombre') !== null
-    const esNegocio   = ['business', 'producer_farm', 'producer_artisan'].includes(form.role)
     router.push(vieneDeMapa && esNegocio ? '/receive' : '/home')
     router.refresh()
   }
@@ -145,19 +167,68 @@ function RegisterForm() {
             </div>
           </div>
 
-          {form.role === 'business' && (
-            <div>
-              <label className="text-sm font-bold text-gray-600">Categoría del negocio</label>
-              <select
-                value={form.category}
-                onChange={e => update('category', e.target.value)}
-                className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
-                required
-              >
-                <option value="">Selecciona una categoría</option>
-                {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
+          {esNegocio && (
+            <>
+              <div>
+                <label className="text-sm font-bold text-gray-600">Categoría del negocio</label>
+                <select
+                  value={form.category}
+                  onChange={e => update('category', e.target.value)}
+                  className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
+                  required={esNegocio}
+                >
+                  <option value="">Selecciona una categoría</option>
+                  {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+
+              {/* Ubicación en el mapa */}
+              <div>
+                <label className="text-sm font-bold text-gray-600">Ubicación en el mapa</label>
+                <div className="mt-1">
+                  {ubicacion ? (
+                    <div className="flex items-center gap-3 bg-green-50 border-2 border-green-200 rounded-2xl px-4 py-3">
+                      <span className="text-xl">📍</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-green-700">Ubicación capturada</p>
+                        <p className="text-xs text-green-600 mt-0.5">
+                          {ubicacion.lat.toFixed(5)}, {ubicacion.lng.toFixed(5)}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setUbicacion(null)}
+                        className="text-green-500 text-xs font-bold"
+                      >
+                        Borrar
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={obtenerUbicacion}
+                      disabled={gpsLoading}
+                      className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-2xl px-4 py-3 text-sm font-bold text-gray-500 hover:border-red-300 hover:text-red-600 transition-all disabled:opacity-50"
+                    >
+                      {gpsLoading ? (
+                        <span>Obteniendo ubicación...</span>
+                      ) : (
+                        <>
+                          <span className="text-xl">📍</span>
+                          <span>Usar mi ubicación actual</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                  {gpsError && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{gpsError}</p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">
+                    Permite que tu negocio aparezca en el mapa de la red
+                  </p>
+                </div>
+              </div>
+            </>
           )}
 
           {error && (

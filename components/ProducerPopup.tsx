@@ -18,24 +18,11 @@ const ROLE_LABEL: Record<string, string> = {
 }
 
 export default function ProducerPopup({ profile, distanceKm, userRadius, onClose }: Props) {
-  const router = useRouter()
-  const inRange  = distanceKm <= userRadius
-  const isDemo   = profile.id.startsWith('demo-')
-
-  function handleActivar() {
-    const params = new URLSearchParams({
-      nombre:    profile.name,
-      categoria: profile.category ?? '',
-      rol:       profile.role,
-      lat:       String(profile.lat ?? ''),
-      lng:       String(profile.lng ?? ''),
-    })
-    router.push(`/register?${params.toString()}`)
-  }
+  const router  = useRouter()
+  const inRange = distanceKm <= userRadius
 
   return (
     <div className="absolute bottom-4 left-3 right-3 z-[1000] bg-white rounded-2xl shadow-2xl p-4 border border-gray-100 animate-fade-up">
-      {/* Encabezado */}
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1 min-w-0">
           <p className="font-bold text-gray-800 text-base truncate">{profile.name}</p>
@@ -52,12 +39,10 @@ export default function ProducerPopup({ profile, distanceKm, userRadius, onClose
         </button>
       </div>
 
-      {/* Distancia */}
       <p className="text-sm text-gray-600 mb-3 font-medium">
         📍 {distanceKm.toFixed(1)} km de ti
       </p>
 
-      {/* Badge rango */}
       {inRange ? (
         <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
           ✅ Dentro de tu rango de suministro
@@ -68,33 +53,12 @@ export default function ProducerPopup({ profile, distanceKm, userRadius, onClose
         </span>
       )}
 
-      {isDemo ? (
-        /* Negocio demo — no tiene cuenta real aún */
-        <div className="space-y-2">
-          <div className="bg-blue-50 rounded-xl px-3 py-2 text-center">
-            <p className="text-xs text-blue-700 font-semibold">
-              Este negocio aún no está registrado en Moneed
-            </p>
-          </div>
-          <button
-            onClick={handleActivar}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-extrabold active:scale-95 transition-all shadow-md shadow-blue-200"
-          >
-            ✨ Registrar y activar este negocio
-          </button>
-          <p className="text-xs text-gray-400 text-center">
-            Crea la cuenta del negocio y genera su QR de cobro
-          </p>
-        </div>
-      ) : (
-        /* Negocio real — puede recibir pagos */
-        <button
-          onClick={() => router.push('/transfer')}
-          className="w-full bg-red-600 text-white py-3 rounded-xl text-sm font-extrabold active:scale-95 transition-all shadow-md shadow-red-200"
-        >
-          Pagar con NodoCoins
-        </button>
-      )}
+      <button
+        onClick={() => router.push('/transfer')}
+        className="w-full bg-red-600 text-white py-3 rounded-xl text-sm font-extrabold active:scale-95 transition-all shadow-md shadow-red-200"
+      >
+        Pagar con NodoCoins
+      </button>
     </div>
   )
 }

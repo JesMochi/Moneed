@@ -19,17 +19,6 @@ interface Props {
   allProfiles: Profile[]
 }
 
-// Datos demo integrados — se usan cuando no hay perfiles reales con lat/lng
-// Coordenadas de Monterrey, NL (ajusta para tu ciudad si es necesario)
-const DEMO_PROFILES: Profile[] = [
-  { id: 'demo-1', name: 'Rancho San Miguel',        role: 'producer_farm',    category: 'Miel orgánica',      lat: 25.6750, lng: -100.3180, supply_radius_km: 15, balance: 500, created_at: '' },
-  { id: 'demo-2', name: 'Cooperativa Maíz Criollo', role: 'producer_farm',    category: 'Maíz y granos',      lat: 25.6800, lng: -100.3050, supply_radius_km: 20, balance: 350, created_at: '' },
-  { id: 'demo-3', name: 'Taller Barro Negro',        role: 'producer_artisan', category: 'Cerámica artesanal', lat: 25.6640, lng: -100.3220, supply_radius_km: 10, balance: 200, created_at: '' },
-  { id: 'demo-4', name: 'Bordados Doña Rosa',        role: 'producer_artisan', category: 'Textiles bordados',  lat: 25.6710, lng: -100.2980, supply_radius_km: 8,  balance: 180, created_at: '' },
-  { id: 'demo-5', name: 'Cafetería El Buen Sabor',   role: 'business',         category: 'Cafetería',          lat: 25.6691, lng: -100.3098, supply_radius_km: 10, balance: 300, created_at: '' },
-  { id: 'demo-6', name: 'Panadería La Aurora',       role: 'business',         category: 'Panadería',          lat: 25.6720, lng: -100.3150, supply_radius_km: 12, balance: 420, created_at: '' },
-]
-
 // Colores e iconos por rol
 const ROLE_CONFIG: Record<string, { color: string; emoji: string }> = {
   consumer:          { color: '#9ca3af', emoji: '👤' },
@@ -50,11 +39,7 @@ function divIconHtml(emoji: string, color: string, opacity: number) {
   "><span style="transform:rotate(45deg);font-size:13px;">${emoji}</span></div>`
 }
 
-export default function BusinessMap({ currentUser, allProfiles: rawProfiles }: Props) {
-  // Si no hay perfiles reales con coordenadas, usa los datos demo
-  const allProfiles = rawProfiles.filter(p => p.lat && p.lng && p.id !== currentUser.id).length > 0
-    ? rawProfiles
-    : DEMO_PROFILES
+export default function BusinessMap({ currentUser, allProfiles }: Props) {
   const mapDivRef    = useRef<HTMLDivElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef       = useRef<any>(null)
