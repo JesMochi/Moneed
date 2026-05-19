@@ -57,18 +57,21 @@ function RegisterForm() {
     }
 
     // Crea el perfil manualmente como respaldo al trigger
-    // (el trigger puede tardar o fallar en algunos entornos Supabase)
     if (data.user) {
+      const latParam = searchParams.get('lat')
+      const lngParam = searchParams.get('lng')
       await supabase.from('profiles').upsert({
-        id: data.user.id,
-        name: form.name,
-        role: form.role,
-        balance: 100,
+        id:       data.user.id,
+        name:     form.name,
+        role:     form.role,
+        balance:  100,
         category: form.role === 'business' ? form.category : null,
+        // Si vino del mapa, guarda las coordenadas del negocio demo para aparecer en el mapa real
+        lat: latParam ? Number(latParam) : null,
+        lng: lngParam ? Number(lngParam) : null,
       }, { onConflict: 'id' })
     }
 
-    // Si vino del mapa para registrar un negocio, ir directo a generar QR
     const vieneDeMapa = searchParams.get('nombre') !== null
     const esNegocio   = ['business', 'producer_farm', 'producer_artisan'].includes(form.role)
     router.push(vieneDeMapa && esNegocio ? '/receive' : '/home')

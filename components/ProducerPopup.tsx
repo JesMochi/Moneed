@@ -27,6 +27,8 @@ export default function ProducerPopup({ profile, distanceKm, userRadius, onClose
       nombre:    profile.name,
       categoria: profile.category ?? '',
       rol:       profile.role,
+      lat:       String(profile.lat ?? ''),
+      lng:       String(profile.lng ?? ''),
     })
     router.push(`/register?${params.toString()}`)
   }
