@@ -37,7 +37,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-red-50 to-gray-100 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-red-700">MonedaRed</h1>
+          <h1 className="text-4xl font-bold text-red-700">Moneed</h1>
           <p className="text-gray-500 text-sm mt-1">Circulación económica local</p>
         </div>
 

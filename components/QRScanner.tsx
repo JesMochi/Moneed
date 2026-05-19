@@ -47,7 +47,7 @@ export default function QRScanner() {
             setQrData(data)
             setEstado('confirm')
           } catch {
-            setErrorMsg('QR inválido — no es un código MonedaRed')
+            setErrorMsg('QR inválido — no es un código Moneed')
             setEstado('error')
           }
         },

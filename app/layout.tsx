@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'MonedaRed',
+  title: 'Moneed',
   description: 'Circulación económica local — HackaTec 2026',
 }
 

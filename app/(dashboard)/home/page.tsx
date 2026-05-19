@@ -57,7 +57,7 @@ export default function HomePage() {
   return (
     <div className="p-4 space-y-5">
       <div className="flex items-center justify-between pt-2">
-        <span className="text-xl font-bold text-red-700">MonedaRed</span>
+        <span className="text-xl font-bold text-red-700">Moneed</span>
         <button onClick={handleLogout} className="text-gray-400 text-sm font-semibold hover:text-gray-600">
           Salir
         </button>

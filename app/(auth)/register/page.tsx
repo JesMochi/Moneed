@@ -59,7 +59,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
 
         <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-red-700">MonedaRed</h1>
+          <h1 className="text-4xl font-bold text-red-700">Moneed</h1>
           <p className="text-gray-500 text-sm mt-1">Crea tu cuenta</p>
         </div>
 
