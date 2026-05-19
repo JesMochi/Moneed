@@ -14,7 +14,8 @@ export default function ReceivePage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-      if (data?.role !== 'business') { router.push('/home'); return }
+      const rolesPermitidos = ['business', 'producer_farm', 'producer_artisan']
+      if (data && !rolesPermitidos.includes(data.role)) { router.push('/home'); return }
       setChecking(false)
     }
     verificarRol()

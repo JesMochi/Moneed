@@ -1,17 +1,35 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
-const CATEGORIAS = ['Cafetería', 'Panadería', 'Abarrotes', 'Restaurante', 'Farmacia', 'Mercado', 'Artesanías', 'Otro']
+const CATEGORIAS = ['Cafetería', 'Panadería', 'Abarrotes', 'Restaurante', 'Farmacia', 'Mercado', 'Artesanías', 'Otro', 'Miel orgánica', 'Maíz y granos', 'Cerámica artesanal', 'Textiles bordados']
 
-export default function RegisterPage() {
-  const router = useRouter()
+function RegisterForm() {
+  const router       = useRouter()
+  const searchParams = useSearchParams()
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'consumer', category: '' })
-  const [error, setError] = useState('')
+  const [error, setError]   = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Pre-llenar desde URL si viene del mapa (demo business)
+  useEffect(() => {
+    const nombre    = searchParams.get('nombre')
+    const categoria = searchParams.get('categoria')
+    const rol       = searchParams.get('rol')
+    if (nombre || categoria || rol) {
+      setForm(prev => ({
+        ...prev,
+        name:     nombre    ?? prev.name,
+        category: categoria ?? prev.category,
+        role:     (rol === 'business' || rol === 'producer_farm' || rol === 'producer_artisan')
+                    ? rol
+                    : 'business',
+      }))
+    }
+  }, [searchParams])
 
   const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }))
 
@@ -50,7 +68,10 @@ export default function RegisterPage() {
       }, { onConflict: 'id' })
     }
 
-    router.push('/home')
+    // Si vino del mapa para registrar un negocio, ir directo a generar QR
+    const vieneDeMapa = searchParams.get('nombre') !== null
+    const esNegocio   = ['business', 'producer_farm', 'producer_artisan'].includes(form.role)
+    router.push(vieneDeMapa && esNegocio ? '/receive' : '/home')
     router.refresh()
   }
 
@@ -157,5 +178,13 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   )
 }
