@@ -13,12 +13,21 @@ const ROLE_ICON: Record<string, string> = {
   consumer:          '👤',
 }
 
-export default function DirectTransfer() {
-  const [estado, setEstado]     = useState<Estado>('buscar')
+interface Props {
+  preselectedId?:   string | null
+  preselectedName?: string | null
+}
+
+export default function DirectTransfer({ preselectedId, preselectedName }: Props) {
+  const initialSelected: Profile | null = preselectedId && preselectedName
+    ? { id: preselectedId, name: preselectedName, role: 'business', balance: 0, created_at: '' }
+    : null
+
+  const [estado, setEstado]     = useState<Estado>(initialSelected ? 'monto' : 'buscar')
   const [query, setQuery]       = useState('')
   const [results, setResults]   = useState<Profile[]>([])
   const [buscando, setBuscando] = useState(false)
-  const [selected, setSelected] = useState<Profile | null>(null)
+  const [selected, setSelected] = useState<Profile | null>(initialSelected)
   const [amount, setAmount]     = useState('')
   const [note, setNote]         = useState('')
   const [loading, setLoading]   = useState(false)

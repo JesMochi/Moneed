@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import QRScanner from '@/components/QRScanner'
 import DirectTransfer from '@/components/DirectTransfer'
 
@@ -9,8 +10,22 @@ const TABS = [
   { id: 'direct', label: '👤 Envío directo' },
 ] as const
 
-export default function TransferPage() {
+function TransferContent() {
+  const searchParams = useSearchParams()
   const [tab, setTab] = useState<'qr' | 'direct'>('qr')
+  const [preselectedId,   setPreselectedId]   = useState<string | null>(null)
+  const [preselectedName, setPreselectedName] = useState<string | null>(null)
+
+  // Si viene del mapa con ?to=ID&nombre=Nombre, abre envío directo pre-seleccionado
+  useEffect(() => {
+    const to     = searchParams.get('to')
+    const nombre = searchParams.get('nombre')
+    if (to && nombre) {
+      setPreselectedId(to)
+      setPreselectedName(nombre)
+      setTab('direct')
+    }
+  }, [searchParams])
 
   return (
     <div className="p-4 space-y-5">
@@ -19,16 +34,13 @@ export default function TransferPage() {
         <p className="text-gray-400 text-sm mt-0.5">Envía NodoCoins a quien quieras</p>
       </div>
 
-      {/* Tabs estilo pill */}
       <div className="grid grid-cols-2 gap-1 bg-gray-100 rounded-2xl p-1">
         {TABS.map(t => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => { setTab(t.id); setPreselectedId(null); setPreselectedName(null) }}
             className={`py-2.5 rounded-xl text-sm font-extrabold transition-all active:scale-95 ${
-              tab === t.id
-                ? 'bg-white shadow text-gray-800'
-                : 'text-gray-400'
+              tab === t.id ? 'bg-white shadow text-gray-800' : 'text-gray-400'
             }`}
           >
             {t.label}
@@ -36,7 +48,18 @@ export default function TransferPage() {
         ))}
       </div>
 
-      {tab === 'qr' ? <QRScanner /> : <DirectTransfer />}
+      {tab === 'qr'
+        ? <QRScanner />
+        : <DirectTransfer preselectedId={preselectedId} preselectedName={preselectedName} />
+      }
     </div>
+  )
+}
+
+export default function TransferPage() {
+  return (
+    <Suspense>
+      <TransferContent />
+    </Suspense>
   )
 }

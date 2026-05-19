@@ -54,7 +54,10 @@ export default function ProducerPopup({ profile, distanceKm, userRadius, onClose
       )}
 
       <button
-        onClick={() => router.push('/transfer')}
+        onClick={() => {
+          const params = new URLSearchParams({ to: profile.id, nombre: profile.name })
+          router.push(`/transfer?${params.toString()}`)
+        }}
         className="w-full bg-red-600 text-white py-3 rounded-xl text-sm font-extrabold active:scale-95 transition-all shadow-md shadow-red-200"
       >
         Pagar con NodoCoins
