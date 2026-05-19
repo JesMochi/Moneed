@@ -168,68 +168,70 @@ function RegisterForm() {
           </div>
 
           {esNegocio && (
-            <>
-              <div>
-                <label className="text-sm font-bold text-gray-600">Categoría del negocio</label>
-                <select
-                  value={form.category}
-                  onChange={e => update('category', e.target.value)}
-                  className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
-                  required={esNegocio}
-                >
-                  <option value="">Selecciona una categoría</option>
-                  {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-
-              {/* Ubicación en el mapa */}
-              <div>
-                <label className="text-sm font-bold text-gray-600">Ubicación en el mapa</label>
-                <div className="mt-1">
-                  {ubicacion ? (
-                    <div className="flex items-center gap-3 bg-green-50 border-2 border-green-200 rounded-2xl px-4 py-3">
-                      <span className="text-xl">📍</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-green-700">Ubicación capturada</p>
-                        <p className="text-xs text-green-600 mt-0.5">
-                          {ubicacion.lat.toFixed(5)}, {ubicacion.lng.toFixed(5)}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setUbicacion(null)}
-                        className="text-green-500 text-xs font-bold"
-                      >
-                        Borrar
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={obtenerUbicacion}
-                      disabled={gpsLoading}
-                      className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-2xl px-4 py-3 text-sm font-bold text-gray-500 hover:border-red-300 hover:text-red-600 transition-all disabled:opacity-50"
-                    >
-                      {gpsLoading ? (
-                        <span>Obteniendo ubicación...</span>
-                      ) : (
-                        <>
-                          <span className="text-xl">📍</span>
-                          <span>Usar mi ubicación actual</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                  {gpsError && (
-                    <p className="text-red-500 text-xs mt-1 font-medium">{gpsError}</p>
-                  )}
-                  <p className="text-xs text-gray-400 mt-1">
-                    Permite que tu negocio aparezca en el mapa de la red
-                  </p>
-                </div>
-              </div>
-            </>
+            <div>
+              <label className="text-sm font-bold text-gray-600">Categoría del negocio</label>
+              <select
+                value={form.category}
+                onChange={e => update('category', e.target.value)}
+                className="mt-1 w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-400 transition-colors bg-gray-50"
+                required={esNegocio}
+              >
+                <option value="">Selecciona una categoría</option>
+                {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
           )}
+
+          {/* Ubicación — para todos los roles */}
+          <div>
+            <label className="text-sm font-bold text-gray-600">
+              {esNegocio ? 'Ubicación de tu negocio' : 'Tu ubicación'}
+            </label>
+            <div className="mt-1">
+              {ubicacion ? (
+                <div className="flex items-center gap-3 bg-green-50 border-2 border-green-200 rounded-2xl px-4 py-3">
+                  <span className="text-xl">📍</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-green-700">Ubicación capturada</p>
+                    <p className="text-xs text-green-600 mt-0.5">
+                      {ubicacion.lat.toFixed(5)}, {ubicacion.lng.toFixed(5)}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setUbicacion(null)}
+                    className="text-green-500 text-xs font-bold"
+                  >
+                    Borrar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={obtenerUbicacion}
+                  disabled={gpsLoading}
+                  className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-2xl px-4 py-3 text-sm font-bold text-gray-500 hover:border-red-300 hover:text-red-600 transition-all disabled:opacity-50"
+                >
+                  {gpsLoading ? (
+                    <span>Obteniendo ubicación...</span>
+                  ) : (
+                    <>
+                      <span className="text-xl">📍</span>
+                      <span>Usar mi ubicación actual</span>
+                    </>
+                  )}
+                </button>
+              )}
+              {gpsError && (
+                <p className="text-red-500 text-xs mt-1 font-medium">{gpsError}</p>
+              )}
+              <p className="text-xs text-gray-400 mt-1">
+                {esNegocio
+                  ? 'Para aparecer en el mapa de la red'
+                  : 'Para mostrarte los negocios más cercanos a ti'}
+              </p>
+            </div>
+          </div>
 
           {error && (
             <p className="text-red-600 text-sm text-center font-semibold bg-red-50 rounded-xl py-2 px-3">
