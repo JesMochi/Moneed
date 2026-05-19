@@ -84,18 +84,11 @@ export default function BusinessMap({ currentUser, allProfiles }: Props) {
 
       const marker = L.marker([profile.lat, profile.lng], { icon })
 
-      if (isProducer) {
-        marker.on('click', () => {
-          setSelected(profile)
-          setSelectedDist(dist)
-        })
-      } else {
-        marker.bindPopup(`
-          <div style="font-family:serif;min-width:130px;">
-            <b style="font-size:13px;">${profile.name}</b><br/>
-            <span style="color:#666;font-size:11px;">${profile.category ?? profile.role}</span>
-          </div>`)
-      }
+      // Todos los negocios y productores abren el popup de pago React
+      marker.on('click', () => {
+        setSelected(profile)
+        setSelectedDist(dist)
+      })
 
       groupRef.current.addLayer(marker)
     })
