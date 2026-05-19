@@ -131,42 +131,40 @@ export default function DirectTransfer({ preselectedId, preselectedName }: Props
             {ROLE_ICON[selected.role] ?? '👤'}
           </div>
           <div className="flex-1">
+            <p className="text-xs text-gray-400 font-semibold">Enviando a</p>
             <p className="font-extrabold text-gray-800">{selected.name}</p>
-            <p className="text-xs text-gray-400">{selected.category || selected.role}</p>
           </div>
-          <button onClick={() => { setEstado('buscar'); setSelected(null) }}
-            className="text-gray-400 text-xs font-semibold">
+          <button
+            onClick={() => { setEstado('buscar'); setSelected(null) }}
+            className="text-gray-400 text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1"
+          >
             Cambiar
           </button>
         </div>
 
-        {/* Monto grande estilo wallet */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm text-center space-y-1">
-          <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Monto a enviar</p>
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <span className="text-3xl font-black text-gray-300">NC</span>
-            <input
-              type="number"
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
-              className="text-5xl font-black text-red-600 w-40 text-center bg-transparent border-none outline-none"
-              placeholder="0"
-              min="0.5"
-              step="0.5"
-              autoFocus
-            />
-          </div>
-          <p className="text-xs text-gray-400">1 NC = 1 peso mexicano</p>
-        </div>
+        {/* Monto — input claro y visible */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm space-y-3">
+          <label className="text-sm font-bold text-gray-600 block">
+            Monto a enviar (NodoCoins)
+          </label>
+          <input
+            type="number"
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            className="w-full border-2 border-gray-200 rounded-2xl px-4 py-4 text-2xl font-black text-red-600 text-center focus:outline-none focus:border-red-400 bg-gray-50"
+            placeholder="0.00"
+            min="0.5"
+            step="0.5"
+            inputMode="decimal"
+          />
+          <p className="text-xs text-gray-400 text-center">1 NodoCoin = 1 peso mexicano</p>
 
-        {/* Nota */}
-        <div className="bg-white rounded-2xl px-4 py-3 shadow-sm">
           <input
             type="text"
             value={note}
             onChange={e => setNote(e.target.value)}
-            className="w-full text-sm text-gray-600 bg-transparent outline-none font-medium"
-            placeholder="💬 Agregar nota (opcional)"
+            className="w-full border-2 border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium text-gray-600 focus:outline-none focus:border-red-300 bg-gray-50"
+            placeholder="💬 Nota (opcional)"
           />
         </div>
 
@@ -175,9 +173,14 @@ export default function DirectTransfer({ preselectedId, preselectedName }: Props
           disabled={loading || !amount || Number(amount) <= 0}
           className="w-full bg-red-600 text-white py-4 rounded-2xl font-extrabold text-lg disabled:opacity-50 active:scale-95 transition-all shadow-lg shadow-red-200"
         >
-          {loading ? 'Enviando...' : `Enviar ${amount ? formatNC(Number(amount)) : ''}`}
+          {loading
+            ? 'Enviando...'
+            : amount && Number(amount) > 0
+              ? `Enviar ${formatNC(Number(amount))}`
+              : 'Ingresa un monto'}
         </button>
-        <button onClick={() => { setEstado('buscar'); setSelected(null) }}
+        <button
+          onClick={() => { setEstado('buscar'); setSelected(null) }}
           disabled={loading}
           className="w-full text-gray-400 text-sm py-2">
           Cancelar
